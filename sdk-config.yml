@@ -1,0 +1,57 @@
+api: real-estate-api
+languages:
+  java:
+    sdk_name: realestateapijava
+    group_id: com.yourorg
+  python:
+    sdk_name: real_estate_api_py
+  typescript:
+    sdk_name: real_estate_api_ts
+  rust:
+    sdk_name: real_estate_api_rs
+    cli: false
+  go:
+    sdk_name: real_estate_api_go
+servers:
+- url: https://api.realestateapi.com
+  name: production
+  default: true
+auths:
+- id: sec0
+  param: api_key
+default_module_structure: path
+modules:
+- path: address
+  operations:
+  - id: address-verification-api
+    function_name: verify
+- path: property
+  operations:
+  - id: csv-generator-api
+    function_name: generate_csv
+  - id: property-comps-api
+    function_name: comps_standard
+  - id: v3-comps-response-object
+    function_name: comps_custom
+  - id: property-detail-api-1
+    function_name: details
+  - id: property-detail-bulk-api
+    function_name: details_bulk
+  - id: beta-mapping-pins-api
+    function_name: pins
+  - id: property-search-api
+    function_name: search
+- path: gpt
+  operations:
+  - id: propgpt-api
+    function_name: chat
+- path: valuation
+  operations:
+  - id: lender-grade-avm-api
+    function_name: avm
+- path: reports
+  operations:
+  - id: involuntary-lien-api
+    function_name: property_liens
+
+
