@@ -17,41 +17,44 @@ servers:
   name: production
   default: true
 auths:
-- id: sec0
+- id: ApiKeyAuth
   param: api_key
 default_module_structure: path
 modules:
-- path: address
-  operations:
-  - id: address-verification-api
-    function_name: verify
 - path: property
   operations:
-  - id: csv-generator-api
-    function_name: generate_csv
+  - id: property-parcel-api
+    function_name: parcel
   - id: property-comps-api
-    function_name: comps_standard
-  - id: v3-comps-response-object
-    function_name: comps_custom
-  - id: property-detail-api-1
+    function_name: comparables
+  - id: property-detail-api
     function_name: details
   - id: property-detail-bulk-api
-    function_name: details_bulk
+    function_name: bulk_details
   - id: beta-mapping-pins-api
     function_name: pins
   - id: property-search-api
     function_name: search
+  - id: v3-property-comps-api
+    function_name: comparables_advanced
+- path: address
+  operations:
+  - id: address-verification-api
+    function_name: verify
+  - id: autocomplete-api
+    function_name: auto_complete
+- path: reporting
+  operations:
+  - id: csv-generator-api
+    function_name: generate_csv
+  - id: involuntary-lien-api
+    function_name: lien
 - path: gpt
   operations:
   - id: propgpt-api
     function_name: chat
-- path: valuation
+- path: avm
   operations:
   - id: lender-grade-avm-api
-    function_name: avm
-- path: reports
-  operations:
-  - id: involuntary-lien-api
-    function_name: property_liens
-
+    function_name: get_valuation
 
