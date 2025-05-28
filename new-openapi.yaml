@@ -1,0 +1,2528 @@
+openapi: 3.1.0
+info:
+  title: Real Estate Data API
+  version: 2.0.0
+  description: |
+    A comprehensive real estate data API providing property information, comparables, search capabilities, and analytics tools.
+    
+    This API offers access to detailed property data including ownership information, sales history, mortgage details, 
+    demographic data, and market valuations across the United States.
+    
+    ## Key Features
+    - **Property Search**: Advanced filtering and search capabilities across millions of properties
+    - **Property Details**: Comprehensive property information including ownership, mortgages, and valuations
+    - **Comparables (Comps)**: Automated property comparables with customizable criteria
+    - **Property Boundaries**: GeoJSON property boundary data for mapping applications
+    - **Market Analytics**: Demographic data, suggested rent values, and market insights
+    - **Address Verification**: Standardized address validation and geocoding
+    - **Bulk Operations**: Efficient processing of large property datasets
+    
+    ## Data Coverage
+    - Nationwide property coverage across all 50 US states
+    - Regular data updates from county assessors, MLS systems, and public records
+    - Historical sales data going back multiple decades
+    - Current mortgage and lien information
+    
+  contact:
+    name: Real Estate API Support
+    email: dev@realestateapi.com
+    url: https://developer.realestateapi.com
+servers:
+  - url: https://api.realestateapi.com
+    description: Production server
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /v2/PropertySearch:
+    post:
+      summary: Property Search API
+      description: |
+        Searchable API for list building, search counts, and advanced filtering on properties. 
+        You can also use this API to implement your own comparables API, or property analytics API.
+        
+        This API implements easy paging so your apps can easily manage filtered results in a results pane with paging. 
+        When your user clicks on a result, just use the id from this API to get the full property results using the Property Detail API.
+      operationId: property-search-api
+      tags:
+        - Property Search
+      parameters:
+        - $ref: '#/components/parameters/UserIdHeader'
+      requestBody:
+        $ref: '#/components/requestBodies/PropertySearchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PropertySearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v2/PropertyDetail:
+    post:
+      summary: Property Detail API
+      description: |
+        Comprehensive property information including comps, mortgages, mailing addresses, 
+        property sales history & more!
+      operationId: property-detail-api
+      tags:
+        - Property Details
+      parameters:
+        - $ref: '#/components/parameters/UserIdHeader'
+      requestBody:
+        $ref: '#/components/requestBodies/PropertyDetailRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PropertyDetailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v2/PropertyDetailBulk:
+    post:
+      summary: Property Detail Bulk API
+      description: |
+        For retrieving up to 1000 properties at once. Can be used standalone, but it's designed 
+        to work together with the Property Search API. Use this API for quickly exporting lists, 
+        or bulk search requests for analytics.
+      operationId: property-detail-bulk-api
+      tags:
+        - Property Details
+      parameters:
+        - $ref: '#/components/parameters/UserIdHeader'
+      requestBody:
+        $ref: '#/components/requestBodies/PropertyBulkRequest'
+      responses:
+        '200':
+          description: Bulk property details retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PropertyDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/PropertyParcel:
+    post:
+      summary: Property Boundary API
+      description: |
+        Shape files API and property search API. All requests return the parcel boundaries 
+        in GEOJSON format. Quickly implement this API into your mapping applications.
+      operationId: property-parcel-api
+      tags:
+        - Property Boundaries
+      parameters:
+        - $ref: '#/components/parameters/UserIdHeader'
+      requestBody:
+        $ref: '#/components/requestBodies/PropertyParcelRequest'
+      responses:
+        '200':
+          description: Property parcel boundaries retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        description: GeoJSON FeatureCollection containing property boundaries
+                        properties:
+                          type:
+                            type: string
+                            enum: [FeatureCollection]
+                          features:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum: [Feature]
+                                geometry:
+                                  type: object
+                                  description: GeoJSON geometry object
+                                properties:
+                                  type: object
+                                  description: Property metadata
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v2/PropertyComps:
+    post:
+      summary: Property Comparables API v2
+      description: |
+        Generate property comparables (comps) for valuation analysis using our standard algorithm.
+      operationId: property-comps-api
+      tags:
+        - Property Comparables
+      parameters:
+        - $ref: '#/components/parameters/UserIdHeader'
+      requestBody:
+        $ref: '#/components/requestBodies/PropertyCompsRequest'
+      responses:
+        '200':
+          description: Property comparables retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          subject:
+                            $ref: '#/components/schemas/PropertyDetail'
+                          comps:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/PropertySearchResult'
+                          reapiAvm:
+                            type: integer
+                            description: RealEstateAPI's Automated Valuation Model estimate
+                            example: 1368707
+                          recordCount:
+                            type: integer
+                            description: Number of comparable properties returned
+                            example: 10
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v3/PropertyComps:
+    post:
+      summary: Property Comparables API v3
+      description: |
+        Advanced property comparables API with customizable comp model parameters 
+        for more precise valuation analysis.
+      operationId: v3-property-comps-api
+      tags:
+        - Property Comparables
+      parameters:
+        - $ref: '#/components/parameters/UserIdHeader'
+      requestBody:
+        description: Customizable property comparables request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Property ID for subject property
+                address:
+                  type: string
+                  description: The fully formatted address for your subject property
+                  example: "123 Main St, Arlington, VA 22205"
+                exact_match:
+                  type: boolean
+                  description: Enforces strictness on the address matching. No fuzzy matching.
+                  default: false
+                max_radius_miles:
+                  type: number
+                  format: float
+                  description: Search radius for comparables
+                  minimum: 0.1
+                  maximum: 10
+                  example: 1.0
+                max_days_back:
+                  type: integer
+                  description: Number of days back to search for recent sales comps
+                  minimum: 30
+                  maximum: 3650
+                  example: 180
+                max_results:
+                  type: integer
+                  description: Maximum number of comparable properties to return
+                  minimum: 1
+                  maximum: 100
+                  example: 10
+                arms_length:
+                  type: boolean
+                  description: Only include arms-length transactions
+                  default: true
+                same_baths:
+                  type: boolean
+                  description: Only include properties with same number of bathrooms
+                same_beds:
+                  type: boolean
+                  description: Only include properties with same number of bedrooms
+                same_census_tract:
+                  type: boolean
+                  description: Only include properties in same census tract
+                same_county:
+                  type: boolean
+                  description: Only include properties in same county
+                same_neighborhood:
+                  type: boolean
+                  description: Only include properties in same neighborhood
+                same_zip:
+                  type: boolean
+                  description: Only include properties in same zip code
+                last_sale_price_min:
+                  type: integer
+                  minimum: 0
+                last_sale_price_max:
+                  type: integer
+                  minimum: 0
+                mls_listing_price_min:
+                  type: integer
+                  minimum: 0
+                mls_listing_price_max:
+                  type: integer
+                  minimum: 0
+                bathrooms_min:
+                  type: integer
+                  minimum: 0
+                bathrooms_max:
+                  type: integer
+                  minimum: 0
+                bathrooms_boost:
+                  type: integer
+                  description: Boost factor for bathroom matching (1-50)
+                  minimum: 1
+                  maximum: 50
+                bedrooms_min:
+                  type: integer
+                  minimum: 0
+                bedrooms_max:
+                  type: integer
+                  minimum: 0
+                bedrooms_boost:
+                  type: integer
+                  description: Boost factor for bedroom matching (1-50)
+                  minimum: 1
+                  maximum: 50
+                living_square_feet_min:
+                  type: integer
+                  minimum: 0
+                living_square_feet_max:
+                  type: integer
+                  minimum: 0
+                living_square_feet_boost:
+                  type: integer
+                  description: Boost factor for square footage matching (1-50)
+                  minimum: 1
+                  maximum: 50
+                lot_square_feet_min:
+                  type: integer
+                  minimum: 0
+                lot_square_feet_max:
+                  type: integer
+                  minimum: 0
+                lot_square_feet_boost:
+                  type: integer
+                  description: Boost factor for lot size matching (1-50)
+                  minimum: 1
+                  maximum: 50
+                year_built_min:
+                  type: integer
+                  minimum: 1700
+                  maximum: 2030
+                year_built_max:
+                  type: integer
+                  minimum: 1700
+                  maximum: 2030
+                year_built_boost:
+                  type: integer
+                  description: Boost factor for year built matching (1-50)
+                  minimum: 1
+                  maximum: 50
+      responses:
+        '200':
+          description: Customized property comparables retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          subject:
+                            $ref: '#/components/schemas/PropertyDetail'
+                          comps:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/PropertySearchResult'
+                          reapiAvm:
+                            type: integer
+                            description: RealEstateAPI's Automated Valuation Model estimate
+                          compParameters:
+                            type: object
+                            description: Applied comparable search parameters
+                          recordCount:
+                            type: integer
+                            description: Number of comparable properties returned
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v2/AutoComplete:
+    post:
+      summary: AutoComplete API
+      description: |
+        The AutoComplete approximates like property searches based on incomplete address parts and combinations. 
+        Our AutoComplete algorithms are powered by machine learning and give you rich property lists 
+        without having to design tons of different Property Search queries.
+      operationId: autocomplete-api
+      tags:
+        - Address Services
+      parameters:
+        - $ref: '#/components/parameters/UserIdHeader'
+      requestBody:
+        $ref: '#/components/requestBodies/AutoCompleteRequest'
+      responses:
+        '200':
+          description: AutoComplete suggestions retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              description: Unique identifier for the suggestion
+                            title:
+                              type: string
+                              description: Display title for the suggestion
+                              example: "123 Main St, Arlington, VA 22205"
+                            searchType:
+                              type: string
+                              description: Type of search result
+                              example: "A"
+                            address:
+                              $ref: '#/components/schemas/PropertyAddress'
+                            propertyId:
+                              type: string
+                              description: Property ID if this is a specific property
+                            apn:
+                              type: string
+                              description: Assessor's Parcel Number
+                            fips:
+                              type: string
+                              description: FIPS county code
+                            neighborhood:
+                              $ref: '#/components/schemas/Neighborhood'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v2/AddressVerification:
+    post:
+      summary: Address Verification API
+      description: |
+        Verify 1 - 100 addresses at a time for accuracy and standardization.
+      operationId: address-verification-api
+      tags:
+        - Address Services
+      parameters:
+        - $ref: '#/components/parameters/UserIdHeader'
+      requestBody:
+        $ref: '#/components/requestBodies/AddressVerificationRequest'
+      responses:
+        '200':
+          description: Address verification results
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            input:
+                              type: object
+                              description: Original input address
+                              properties:
+                                key:
+                                  type: string
+                                  description: User-provided key for matching
+                                address:
+                                  type: string
+                                city:
+                                  type: string
+                                state:
+                                  type: string
+                                zip:
+                                  type: string
+                            match:
+                              type: boolean
+                              description: Whether address was successfully matched
+                            error:
+                              type: boolean
+                              description: Whether an error occurred
+                            errorMessage:
+                              type: string
+                              description: Error message if applicable
+                            id:
+                              type: string
+                              description: Property ID if matched
+                            address:
+                              $ref: '#/components/schemas/PropertyAddress'
+                            mailAddress:
+                              $ref: '#/components/schemas/PropertyAddress'
+                            propertyDetails:
+                              type: object
+                              description: Basic property information
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v2/PropGPT:
+    post:
+      summary: PropGPT API
+      description: |
+        Natural language property search using AI. Convert natural language queries 
+        into structured property searches. Check out the functionality at https://www.propgpt.com
+      operationId: propgpt-api
+      tags:
+        - AI Search
+      parameters:
+        - name: x-api-key
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Your Real Estate API key
+        - name: x-openai-key
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Your OpenAI API key for token spend tracking
+        - $ref: '#/components/parameters/UserIdHeader'
+      requestBody:
+        description: Natural language property search request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+              properties:
+                query:
+                  type: string
+                  description: Natural language string that references data points for property search
+                  example: "Find all properties listed for sale in Herndon Virginia between 600K and 700K"
+                size:
+                  type: integer
+                  description: Maximum number of results to return
+                  maximum: 250
+                  default: 50
+                model:
+                  type: string
+                  description: OpenAI model to use for query processing
+                  enum: [gpt-4, gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo]
+                  default: gpt-4o
+      responses:
+        '200':
+          description: AI-powered property search results
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      input:
+                        type: object
+                        description: Interpreted search parameters from natural language
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PropertySearchResult'
+                      resultCount:
+                        type: integer
+                        description: Total number of results matching the search
+                      propGPTExecutionTimeMS:
+                        type: string
+                        description: Time spent processing natural language query
+                      searchExecutionTimeMS:
+                        type: string
+                        description: Time spent executing property search
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v2/CSVBuilder:
+    post:
+      summary: CSV Generator API
+      description: |
+        Generate CSV exports of property data based on search criteria. 
+        Useful for bulk data exports and reporting.
+      operationId: csv-generator-api
+      tags:
+        - Data Export
+      parameters:
+        - $ref: '#/components/parameters/UserIdHeader'
+      requestBody:
+        description: CSV generation request with search parameters and column mapping
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/PropertySearchParameters'
+                - type: object
+                  properties:
+                    file_name:
+                      type: string
+                      description: Name for the generated CSV file
+                      minLength: 5
+                      maxLength: 60
+                      example: "property_export_2024"
+                    map:
+                      type: array
+                      description: Array of field names to include in CSV export
+                      items:
+                        type: string
+                      example: ["id", "address", "estimatedValue", "bedrooms", "bathrooms"]
+                    webcomplete_url:
+                      type: string
+                      description: URL to notify when CSV generation is complete
+                      format: uri
+      responses:
+        '200':
+          description: CSV generation initiated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          jobId:
+                            type: string
+                            description: Unique identifier for the CSV generation job
+                          fileName:
+                            type: string
+                            description: Name of the generated CSV file
+                          estimatedRecords:
+                            type: integer
+                            description: Estimated number of records to be exported
+                          status:
+                            type: string
+                            enum: [queued, processing, completed, failed]
+                            description: Current status of the export job
+                          downloadUrl:
+                            type: string
+                            format: uri
+                            description: URL to download the CSV file (available when completed)
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v2/PropertyAvm:
+    post:
+      summary: Lender Grade AVM API
+      description: |
+        Get the most precise property valuations using our lender-grade Automated Valuation Model 
+        that uses statistical modeling, recent sales data, and market-to-market analysis.
+      operationId: lender-grade-avm-api
+      tags:
+        - Property Valuation
+      parameters:
+        - $ref: '#/components/parameters/UserIdHeader'
+      requestBody:
+        description: Property valuation request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Property ID from search results
+                address:
+                  type: string
+                  description: Fully formatted address
+                  example: "123 Main St, Arlington, VA 22205"
+                strict:
+                  type: boolean
+                  description: Enable strict address matching
+                  default: false
+      responses:
+        '200':
+          description: Property valuation retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          propertyId:
+                            type: string
+                            description: Unique property identifier
+                          address:
+                            $ref: '#/components/schemas/PropertyAddress'
+                          avmValue:
+                            type: integer
+                            description: Automated Valuation Model estimate in USD
+                            example: 875000
+                          confidence:
+                            type: number
+                            format: float
+                            description: Confidence score for the valuation (0-1)
+                            example: 0.85
+                          fsd:
+                            type: number
+                            format: float
+                            description: Forecast Standard Deviation
+                            example: 0.12
+                          valuationDate:
+                            type: string
+                            format: date
+                            description: Date of the valuation
+                          comparables:
+                            type: array
+                            description: Properties used in valuation calculation
+                            items:
+                              $ref: '#/components/schemas/PropertySearchResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v2/Reports/PropertyLiens:
+    post:
+      summary: Involuntary Liens API
+      description: |
+        Go beyond standard tax liens and add involuntary lien data to your property insights.
+        Includes federal tax liens, judgment liens, mechanic's liens, and other encumbrances.
+      operationId: involuntary-lien-api
+      tags:
+        - Property Reports
+      parameters:
+        - $ref: '#/components/parameters/UserIdHeader'
+      requestBody:
+        description: Property lien search request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Property ID from search results
+                address:
+                  type: string
+                  description: Fully formatted address
+                  example: "123 Main St, Arlington, VA 22205"
+                zip:
+                  type: string
+                  pattern: "^[0-9]{5}$"
+                  description: 5-digit ZIP code
+                apn:
+                  type: string
+                  description: Assessor's Parcel Number
+                fips:
+                  type: string
+                  pattern: "^[0-9]{5}$"
+                  description: FIPS county code
+      responses:
+        '200':
+          description: Property lien information retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          propertyId:
+                            type: string
+                            description: Unique property identifier
+                          address:
+                            $ref: '#/components/schemas/PropertyAddress'
+                          liens:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  description: Type of lien
+                                  enum: [TAX_LIEN, JUDGMENT_LIEN, MECHANICS_LIEN, FEDERAL_TAX_LIEN, OTHER]
+                                amount:
+                                  type: integer
+                                  description: Lien amount in USD
+                                  minimum: 0
+                                recordingDate:
+                                  type: string
+                                  format: date-time
+                                  description: Date the lien was recorded
+                                lienHolder:
+                                  type: string
+                                  description: Name of the lien holder
+                                documentNumber:
+                                  type: string
+                                  description: Recording document number
+                                status:
+                                  type: string
+                                  description: Current status of the lien
+                                  enum: [ACTIVE, RELEASED, SATISFIED, EXPIRED]
+                                releaseDate:
+                                  type: string
+                                  format: date-time
+                                  description: Date the lien was released (if applicable)
+                          totalLienAmount:
+                            type: integer
+                            description: Total amount of all liens in USD
+                            minimum: 0
+                          lienCount:
+                            type: integer
+                            description: Total number of liens found
+                            minimum: 0
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v2/PropertyMapping:
+    post:
+      summary: Mapping (Pins) API [BETA]
+      description: |
+        Create unlimited map pins for PropTech mapping applications. 
+        Returns property data optimized for map display with coordinates and summary information.
+        Only available on Growth+ Plans.
+      operationId: beta-mapping-pins-api
+      tags:
+        - Mapping
+      parameters:
+        - $ref: '#/components/parameters/UserIdHeader'
+      requestBody:
+        description: Property mapping request with search criteria
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/PropertySearchParameters'
+                - type: object
+                  properties:
+                    # Override polygon to accept string format for this endpoint
+                    polygon:
+                      type: string
+                      description: Polygon boundary as string format
+                    multi_polygon:
+                      type: string
+                      description: Multi-polygon boundaries as string format
+      responses:
+        '200':
+          description: Property mapping data retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          description: Property data optimized for mapping display
+                          properties:
+                            id:
+                              type: string
+                              description: Unique property identifier
+                            latitude:
+                              type: number
+                              format: double
+                              description: Property latitude
+                            longitude:
+                              type: number
+                              format: double
+                              description: Property longitude
+                            address:
+                              type: string
+                              description: Display address
+                            estimatedValue:
+                              type: integer
+                              description: Estimated property value
+                            propertyType:
+                              type: string
+                              description: Property type
+                            bedrooms:
+                              type: integer
+                              description: Number of bedrooms
+                            bathrooms:
+                              type: integer
+                              description: Number of bathrooms
+                            squareFeet:
+                              type: integer
+                              description: Living area square footage
+                            yearBuilt:
+                              type: integer
+                              description: Year property was built
+                            lastSaleDate:
+                              type: string
+                              format: date
+                              description: Date of last sale
+                            lastSalePrice:
+                              type: integer
+                              description: Last sale price
+                            mlsStatus:
+                              type: string
+                              description: Current MLS status
+                            mlsListingPrice:
+                              type: integer
+                              description: Current MLS listing price
+                      resultCount:
+                        type: integer
+                        description: Total number of properties matching criteria
+                      resultIndex:
+                        type: integer
+                        description: Starting index of returned results
+                      recordCount:
+                        type: integer
+                        description: Number of properties returned in this response
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: |
+        API key for authentication. Obtain your API key from the developer dashboard.
+        Include this key in the x-api-key header for all requests.
+
+  parameters:
+    UserIdHeader:
+      name: x-user-id
+      in: header
+      required: false
+      schema:
+        type: string
+        example: "user_12345"
+      description: |
+        Optional unique identifier for the user making the request. 
+        Useful for analytics, rate limiting per user, and debugging.
+
+  schemas:
+    # Core Property Information
+    PropertyAddress:
+      type: object
+      description: Standardized property address information
+      required:
+        - address
+        - city
+        - state
+        - zip
+      properties:
+        address:
+          type: string
+          description: Complete formatted address
+          example: "123 Main St, Anytown, CA 90210"
+        house:
+          type: string
+          description: House number
+          example: "123"
+        street:
+          type: string
+          description: Street name without house number
+          example: "Main St"
+        unit:
+          type: string
+          description: Unit, suite, or apartment number
+          example: "Apt 2B"
+        preDirection:
+          type: string
+          description: Street prefix direction (N, S, E, W, etc.)
+          example: "N"
+        streetType:
+          type: string
+          description: Street type (St, Ave, Blvd, etc.)
+          example: "St"
+        postDirection:
+          type: string
+          description: Street suffix direction
+          example: "NW"
+        city:
+          type: string
+          description: City name
+          example: "Anytown"
+        county:
+          type: string
+          description: County name
+          example: "Los Angeles"
+        state:
+          type: string
+          description: Two-character state code
+          example: "CA"
+          pattern: "^[A-Z]{2}$"
+        zip:
+          type: string
+          description: Five-digit ZIP code
+          example: "90210"
+          pattern: "^[0-9]{5}$"
+        zip4:
+          type: string
+          description: Four-digit ZIP+4 extension
+          example: "1234"
+          pattern: "^[0-9]{4}$"
+        fips:
+          type: string
+          description: Federal Information Processing Standards (FIPS) county code
+          example: "06037"
+        carrierRoute:
+          type: string
+          description: USPS carrier route
+          example: "C032"
+        congressionalDistrict:
+          type: string
+          description: Congressional district number
+          example: "12"
+        censusTract:
+          type: string
+          description: Census tract identifier
+          example: "4001.01"
+        label:
+          type: string
+          description: Formatted address label for display
+          example: "123 Main St, Anytown, CA 90210"
+
+    PropertyIdentifiers:
+      type: object
+      description: Various property identification numbers and codes
+      properties:
+        id:
+          type: string
+          description: Unique property identifier in the Real Estate API system
+          example: "12345678"
+        priorId:
+          type: string
+          description: Previous property ID (if property was re-indexed)
+          example: "87654321"
+        apn:
+          type: string
+          description: Assessor's Parcel Number - unique identifier assigned by county assessor
+          example: "123-456-789"
+        apnUnformatted:
+          type: string
+          description: Unformatted APN without dashes or spaces
+          example: "123456789"
+        parcelAccountNumber:
+          type: string
+          description: County parcel account number
+          example: "05-00925.01"
+
+    PropertyCharacteristics:
+      type: object
+      description: Physical characteristics and features of the property
+      properties:
+        propertyType:
+          type: string
+          description: Primary property type classification
+          enum: [SFR, MFR, CONDO, MOBILE, LAND, OTHER]
+          example: "SFR"
+        propertyUse:
+          type: string
+          description: Detailed property use description
+          example: "Single Family Residence"
+        propertyUseCode:
+          type: integer
+          description: Numeric code for property use type
+          example: 163
+        landUse:
+          type: string
+          description: Land use classification
+          example: "Residential"
+        bedrooms:
+          type: integer
+          description: Number of bedrooms
+          minimum: 0
+          example: 3
+        bathrooms:
+          type: integer
+          description: Number of full bathrooms
+          minimum: 0
+          example: 2
+        partialBathrooms:
+          type: integer
+          description: Number of partial/half bathrooms
+          minimum: 0
+          example: 1
+        roomsCount:
+          type: integer
+          description: Total number of rooms
+          minimum: 0
+          example: 8
+        squareFeet:
+          type: integer
+          description: Living area square footage
+          minimum: 0
+          example: 1850
+        buildingSquareFeet:
+          type: integer
+          description: Total building square footage including non-living areas
+          minimum: 0
+          example: 2100
+        livingSquareFeet:
+          type: integer
+          description: Heated/cooled living area square footage
+          minimum: 0
+          example: 1850
+        lotSquareFeet:
+          type: integer
+          description: Lot size in square feet
+          minimum: 0
+          example: 7200
+        lotAcres:
+          type: number
+          description: Lot size in acres
+          minimum: 0
+          example: 0.165
+        yearBuilt:
+          type: integer
+          description: Year the property was built
+          minimum: 1700
+          maximum: 2030
+          example: 1998
+        stories:
+          type: integer
+          description: Number of stories/floors
+          minimum: 1
+          example: 2
+        unitsCount:
+          type: integer
+          description: Number of units (for multi-family properties)
+          minimum: 0
+          example: 1
+        parkingSpaces:
+          type: integer
+          description: Number of parking spaces
+          minimum: 0
+          example: 2
+
+    PropertyFeatures:
+      type: object
+      description: Property features and amenities
+      properties:
+        pool:
+          type: boolean
+          description: Property has a swimming pool
+          example: false
+        poolArea:
+          type: integer
+          description: Pool area in square feet
+          minimum: 0
+          example: 400
+        garage:
+          type: boolean
+          description: Property has a garage
+          example: true
+        garageType:
+          type: string
+          description: Type of garage
+          example: "Attached"
+        garageSquareFeet:
+          type: integer
+          description: Garage area in square feet
+          minimum: 0
+          example: 480
+        basement:
+          type: boolean
+          description: Property has a basement
+          example: false
+        basementType:
+          type: string
+          description: Type of basement
+          example: "Full"
+        basementSquareFeet:
+          type: integer
+          description: Total basement area in square feet
+          minimum: 0
+          example: 800
+        basementSquareFeetFinished:
+          type: integer
+          description: Finished basement area in square feet
+          minimum: 0
+          example: 600
+        basementSquareFeetUnfinished:
+          type: integer
+          description: Unfinished basement area in square feet
+          minimum: 0
+          example: 200
+        fireplace:
+          type: boolean
+          description: Property has a fireplace
+          example: true
+        fireplaces:
+          type: integer
+          description: Number of fireplaces
+          minimum: 0
+          example: 1
+        deck:
+          type: boolean
+          description: Property has a deck
+          example: true
+        deckArea:
+          type: integer
+          description: Deck area in square feet
+          minimum: 0
+          example: 200
+        patio:
+          type: boolean
+          description: Property has a patio
+          example: true
+        attic:
+          type: boolean
+          description: Property has an attic
+          example: true
+        carport:
+          type: boolean
+          description: Property has a carport
+          example: false
+        rvParking:
+          type: boolean
+          description: Property has RV parking
+          example: false
+        airConditioningAvailable:
+          type: boolean
+          description: Property has air conditioning
+          example: true
+        heatingType:
+          type: string
+          description: Type of heating system
+          example: "Forced Air"
+        heatingFuelType:
+          type: string
+          description: Fuel type for heating system
+          example: "Natural Gas"
+
+    PropertyLocation:
+      type: object
+      description: Geographic location information
+      required:
+        - latitude
+        - longitude
+      properties:
+        latitude:
+          type: number
+          description: Property latitude coordinate (WGS84)
+          minimum: -90
+          maximum: 90
+          example: 34.0522
+        longitude:
+          type: number
+          description: Property longitude coordinate (WGS84)
+          minimum: -180
+          maximum: 180
+          example: -118.2437
+
+    PropertyValuation:
+      type: object
+      description: Property valuation and equity information
+      properties:
+        estimatedValue:
+          type: integer
+          description: Current estimated market value in USD
+          minimum: 0
+          example: 650000
+        assessedValue:
+          type: integer
+          description: County assessed value in USD
+          minimum: 0
+          example: 580000
+        assessedLandValue:
+          type: integer
+          description: County assessed land value in USD
+          minimum: 0
+          example: 200000
+        assessedImprovementValue:
+          type: integer
+          description: County assessed improvement value in USD
+          minimum: 0
+          example: 380000
+        marketValue:
+          type: integer
+          description: Market value from county records in USD
+          minimum: 0
+          example: 645000
+        marketLandValue:
+          type: integer
+          description: Market land value in USD
+          minimum: 0
+          example: 220000
+        marketImprovementValue:
+          type: integer
+          description: Market improvement value in USD
+          minimum: 0
+          example: 425000
+        estimatedEquity:
+          type: integer
+          description: Estimated owner equity (value minus mortgages) in USD
+          example: 250000
+        equityPercent:
+          type: integer
+          description: Equity as percentage of property value
+          minimum: -200
+          maximum: 100
+          example: 38
+
+    OwnerInformation:
+      type: object
+      description: Property owner information and characteristics
+      properties:
+        owner1FirstName:
+          type: string
+          description: First owner's first name
+          example: "John"
+        owner1LastName:
+          type: string
+          description: First owner's last name
+          example: "Smith"
+        owner1FullName:
+          type: string
+          description: First owner's full name
+          example: "John A Smith"
+        owner2FirstName:
+          type: string
+          description: Second owner's first name (if applicable)
+          example: "Jane"
+        owner2LastName:
+          type: string
+          description: Second owner's last name (if applicable)
+          example: "Smith"
+        owner2FullName:
+          type: string
+          description: Second owner's full name (if applicable)
+          example: "Jane B Smith"
+        mailAddress:
+          $ref: '#/components/schemas/PropertyAddress'
+        ownerOccupied:
+          type: boolean
+          description: Property is occupied by the owner
+          example: true
+        absenteeOwner:
+          type: boolean
+          description: Owner does not live at the property
+          example: false
+        inStateAbsenteeOwner:
+          type: boolean
+          description: Absentee owner lives in the same state
+          example: false
+        outOfStateAbsenteeOwner:
+          type: boolean
+          description: Absentee owner lives in a different state
+          example: false
+        corporateOwned:
+          type: boolean
+          description: Property is owned by a corporation or LLC
+          example: false
+        trustOwned:
+          type: boolean
+          description: Property is owned by a trust
+          example: false
+        ownershipLength:
+          type: integer
+          description: Years the current owner has owned the property
+          minimum: 0
+          example: 5
+        yearsOwned:
+          type: integer
+          description: Years the current owner has owned the property
+          minimum: 0
+          example: 5
+
+    MortgageInformation:
+      type: object
+      description: Mortgage and financing details
+      properties:
+        seq:
+          type: string
+          description: Sequence number for this mortgage record
+          example: "0"
+        position:
+          type: string
+          description: Mortgage position (First, Second, etc.)
+          example: "First"
+        recordingDate:
+          type: string
+          format: date-time
+          description: Date the mortgage was recorded
+          example: "2021-06-15T00:00:00Z"
+        documentDate:
+          type: string
+          format: date-time
+          description: Date the mortgage document was created
+          example: "2021-06-15T00:00:00Z"
+        maturityDate:
+          type: string
+          description: Mortgage maturity date (timestamp format)
+          example: "1893456000000"
+        amount:
+          type: integer
+          description: Original mortgage amount in USD
+          minimum: 0
+          example: 520000
+        interestRate:
+          type: number
+          description: Interest rate as a percentage
+          minimum: 0
+          maximum: 50
+          example: 3.25
+        interestRateType:
+          type: string
+          description: Type of interest rate
+          enum: ["FIXED RATE", "ADJUSTABLE RATE", "UNKNOWN"]
+          example: "FIXED RATE"
+        term:
+          type: string
+          description: Loan term in months
+          example: "360"
+        termType:
+          type: string
+          description: Term type description
+          example: "MONTH"
+        lenderName:
+          type: string
+          description: Name of the lending institution
+          example: "Wells Fargo Bank"
+        deedType:
+          type: string
+          description: Type of deed or mortgage document
+          example: "DEED OF TRUST"
+        transactionType:
+          type: string
+          description: Type of transaction
+          example: "PURCHASE"
+        loanType:
+          type: string
+          description: Type of loan
+          example: "CONVENTIONAL"
+        granteeName:
+          type: string
+          description: Name of the grantee (borrower)
+          example: "John and Jane Smith"
+
+    SalesHistoryRecord:
+      type: object
+      description: Historical sales transaction record
+      properties:
+        seq:
+          type: integer
+          description: Sequence number for this sales record
+          example: 0
+        recordingDate:
+          type: string
+          format: date-time
+          description: Date the sale was recorded
+          example: "2020-06-15T00:00:00Z"
+        saleDate:
+          type: string
+          format: date-time
+          description: Actual sale date
+          example: "2020-06-10T00:00:00Z"
+        saleAmount:
+          type: integer
+          description: Sale price in USD
+          minimum: 0
+          example: 575000
+        documentType:
+          type: string
+          description: Type of sale document
+          example: "DTWD"
+        transactionType:
+          type: string
+          description: Type of transaction
+          example: "40"
+        buyerNames:
+          type: string
+          description: Names of the buyers
+          example: "John and Jane Smith"
+        sellerNames:
+          type: string
+          description: Names of the sellers
+          example: "Previous Owner LLC"
+        purchaseMethod:
+          type: string
+          description: Method of purchase (Cash, Financed, etc.)
+          enum: ["Cash Purchase", "Financed", "Unknown"]
+          example: "Financed"
+        downPayment:
+          type: integer
+          description: Down payment amount in USD
+          minimum: 0
+          example: 115000
+        ltv:
+          type: number
+          description: Loan-to-value ratio as a percentage
+          minimum: 0
+          maximum: 200
+          example: 80.0
+
+    TaxInformation:
+      type: object
+      description: Property tax information
+      properties:
+        propertyId:
+          type: string
+          description: Property identifier for tax records
+          example: "12345678"
+        year:
+          type: integer
+          description: Tax year
+          minimum: 1900
+          maximum: 2030
+          example: 2023
+        taxAmount:
+          type: integer
+          description: Annual property tax amount in cents
+          minimum: 0
+          example: 863900
+        assessmentYear:
+          type: integer
+          description: Year of the assessment
+          minimum: 1900
+          maximum: 2030
+          example: 2023
+
+    Demographics:
+      type: object
+      description: Demographic and rental information for the area
+      properties:
+        medianIncome:
+          type: string
+          description: Median household income for the area in USD
+          example: "85000"
+        suggestedRent:
+          type: string
+          description: Suggested monthly rental rate in USD
+          example: "2500"
+        fmrYear:
+          type: string
+          description: Fair Market Rent data year
+          example: "2023"
+        fmrEfficiency:
+          type: string
+          description: Fair Market Rent for efficiency unit in USD
+          example: "1200"
+        fmrOneBedroom:
+          type: string
+          description: Fair Market Rent for one bedroom unit in USD
+          example: "1400"
+        fmrTwoBedroom:
+          type: string
+          description: Fair Market Rent for two bedroom unit in USD
+          example: "1800"
+        fmrThreeBedroom:
+          type: string
+          description: Fair Market Rent for three bedroom unit in USD
+          example: "2200"
+        fmrFourBedroom:
+          type: string
+          description: Fair Market Rent for four bedroom unit in USD
+          example: "2600"
+        hudAreaName:
+          type: string
+          description: HUD area name for Fair Market Rent calculations
+          example: "Los Angeles-Long Beach-Anaheim, CA HUD Metro FMR Area"
+        hudAreaCode:
+          type: string
+          description: HUD area code
+          example: "METRO31080M31080"
+
+    MLSInformation:
+      type: object
+      description: Multiple Listing Service (MLS) information
+      properties:
+        mlsActive:
+          type: boolean
+          description: Property is currently active on MLS
+          example: false
+        mlsPending:
+          type: boolean
+          description: Property sale is pending on MLS
+          example: false
+        mlsCancelled:
+          type: boolean
+          description: MLS listing was cancelled
+          example: false
+        mlsSold:
+          type: boolean
+          description: Property was sold through MLS
+          example: true
+        mlsFailed:
+          type: boolean
+          description: MLS listing failed to sell
+          example: false
+        mlsStatus:
+          type: string
+          description: Current MLS status
+          example: "Sold"
+        mlsType:
+          type: string
+          description: Type of MLS listing
+          example: "ForSale"
+        mlsListingPrice:
+          type: integer
+          description: Current or last MLS listing price in USD
+          minimum: 0
+          example: 599000
+        mlsListingDate:
+          type: string
+          format: date
+          description: Date property was listed on MLS
+          example: "2023-05-15"
+        mlsLastStatusDate:
+          type: string
+          format: date
+          description: Date of last MLS status change
+          example: "2023-06-20"
+        mlsDaysOnMarket:
+          type: integer
+          description: Number of days property was on market
+          minimum: 0
+          example: 36
+        mlsHasPhotos:
+          type: boolean
+          description: MLS listing includes photos
+          example: true
+        mlsLastSaleDate:
+          type: string
+          format: date
+          description: Date of last MLS sale
+          example: "2023-06-20"
+
+    Neighborhood:
+      type: object
+      description: Neighborhood information
+      properties:
+        id:
+          type: string
+          description: Unique neighborhood identifier
+          example: "12345"
+        name:
+          type: string
+          description: Neighborhood name
+          example: "Sunset Hills"
+        type:
+          type: string
+          description: Type of neighborhood boundary
+          example: "subdivision"
+        center:
+          type: string
+          description: Geographic center point of neighborhood (WKT format)
+          example: "POINT(-118.2437 34.0522)"
+
+    # Flood and Environmental Information
+    FloodZoneInformation:
+      type: object
+      description: Flood zone and environmental hazard information
+      properties:
+        floodZone:
+          type: boolean
+          description: Property is in a designated flood zone
+          example: false
+        floodZoneType:
+          type: string
+          description: FEMA flood zone designation
+          example: "X"
+        floodZoneDescription:
+          type: string
+          description: Description of flood zone risk level
+          example: "Area of minimal flood hazard"
+
+    # Property Status Flags
+    PropertyStatusFlags:
+      type: object
+      description: Various boolean flags indicating property status and characteristics
+      properties:
+        vacant:
+          type: boolean
+          description: Property appears to be vacant
+          example: false
+        distressed:
+          type: boolean
+          description: Property shows signs of distress
+          example: false
+        highEquity:
+          type: boolean
+          description: Property has high equity (>40%)
+          example: true
+        negativeEquity:
+          type: boolean
+          description: Property has negative equity (underwater)
+          example: false
+        freeClear:
+          type: boolean
+          description: Property has no outstanding mortgages
+          example: false
+        cashBuyer:
+          type: boolean
+          description: Current owner purchased with cash
+          example: false
+        investorBuyer:
+          type: boolean
+          description: Property was purchased by an investor
+          example: false
+        inherited:
+          type: boolean
+          description: Property was inherited by current owner
+          example: false
+        death:
+          type: boolean
+          description: Recent death of property owner
+          example: false
+
+    # Legal and Financial Flags
+    LegalFinancialFlags:
+      type: object
+      description: Legal and financial status indicators
+      properties:
+        foreclosure:
+          type: boolean
+          description: Property is in foreclosure process
+          example: false
+        preForeclosure:
+          type: boolean
+          description: Property received foreclosure notice
+          example: false
+        auction:
+          type: boolean
+          description: Property is scheduled for auction
+          example: false
+        reo:
+          type: boolean
+          description: Property is Real Estate Owned (bank-owned)
+          example: false
+        taxLien:
+          type: boolean
+          description: Property has tax liens
+          example: false
+        judgment:
+          type: boolean
+          description: Property owner has legal judgments
+          example: false
+        quitClaim:
+          type: boolean
+          description: Recent quit claim deed transfer
+          example: false
+        adjustableRate:
+          type: boolean
+          description: Property has adjustable rate mortgage
+          example: false
+        privateLender:
+          type: boolean
+          description: Property financed by private lender
+          example: false
+        assumable:
+          type: boolean
+          description: Mortgage is assumable
+          example: false
+
+    # API Response Schemas
+    ApiResponse:
+      type: object
+      description: Standard API response wrapper
+      required:
+        - statusCode
+        - statusMessage
+        - live
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP status code
+          example: 200
+        statusMessage:
+          type: string
+          description: Human-readable status message
+          example: "Success"
+        live:
+          type: boolean
+          description: Indicates if this is live data or test data
+          example: true
+        credits:
+          type: number
+          description: Number of API credits consumed by this request
+          minimum: 0
+          example: 1.0
+        requestExecutionTimeMS:
+          type: string
+          description: Total request execution time
+          example: "125ms"
+
+    # Error Response Schema
+    ErrorResponse:
+      type: object
+      description: Error response format
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP error status code
+          example: 400
+        error:
+          type: string
+          description: Error type
+          example: "Bad Request"
+        message:
+          type: string
+          description: Detailed error message
+          example: "Invalid address format provided"
+        validation:
+          type: object
+          description: Validation error details
+          properties:
+            source:
+              type: string
+              example: "payload"
+            keys:
+              type: array
+              items:
+                type: string
+              example: ["address"]
+    # Geographic Coordinate Schema
+    GeoCoordinate:
+      type: object
+      required:
+        - lat
+        - lon
+      properties:
+        lat:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+          description: Latitude coordinate
+        lon:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+          description: Longitude coordinate
+
+    # Range Parameters
+    IntRange:
+      type: object
+      properties:
+        min:
+          type: integer
+          minimum: 0
+        max:
+          type: integer
+          minimum: 0
+
+    DateRange:
+      type: object
+      properties:
+        min:
+          type: string
+          format: date
+        max:
+          type: string
+          format: date
+
+    # Search Parameters
+    PropertySearchParameters:
+      type: object
+      properties:
+        # Control parameters
+        count:
+          type: boolean
+          description: Return only count, not results
+          default: false
+        ids:
+          type: array
+          items:
+            type: string
+          description: List of property IDs to retrieve
+        ids_only:
+          type: boolean
+          description: Return only property IDs
+          default: false
+        obfuscate:
+          type: boolean
+          description: Remove address and name fields
+          default: false
+        summary:
+          type: boolean
+          description: Return aggregated summary data
+          default: false
+        resultIndex:
+          type: integer
+          minimum: 0
+          description: Starting index for pagination
+        size:
+          type: integer
+          minimum: 1
+          maximum: 250
+          description: Number of results to return
+          default: 50
+        
+        # Location parameters
+        address:
+          type: string
+          description: Fully formatted address
+        house:
+          type: string
+          description: House number
+        street:
+          type: string
+          description: Street name
+        city:
+          type: string
+          description: City name
+        state:
+          type: string
+          pattern: "^[A-Z]{2}$"
+          description: Two-letter state code
+        county:
+          type: string
+          description: County name
+        zip:
+          type: string
+          pattern: "^[0-9]{5}$"
+          description: 5-digit ZIP code
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+        radius:
+          type: number
+          minimum: 0.1
+          maximum: 10
+          description: Search radius in miles
+        polygon:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeoCoordinate'
+        multi_polygon:
+          type: array
+          items:
+            type: object
+            properties:
+              boundaries:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GeoCoordinate'
+        
+        # Property type parameters
+        property_type:
+          type: string
+          enum: [SFR, MFR, LAND, CONDO, MOBILE, OTHER]
+        property_use_code:
+          type: integer
+          description: Property use code or array of codes
+        
+        # Boolean filters
+        mls_active:
+          type: boolean
+        mls_pending:
+          type: boolean
+        mls_cancelled:
+          type: boolean
+        mls_sold:
+          type: boolean
+        absentee_owner:
+          type: boolean
+        adjustable_rate:
+          type: boolean
+        assumable:
+          type: boolean
+        auction:
+          type: boolean
+        basement:
+          type: boolean
+        cash_buyer:
+          type: boolean
+        corporate_owned:
+          type: boolean
+        death:
+          type: boolean
+        deck:
+          type: boolean
+        flood_zone:
+          type: boolean
+        foreclosure:
+          type: boolean
+        free_clear:
+          type: boolean
+        garage:
+          type: boolean
+        high_equity:
+          type: boolean
+        inherited:
+          type: boolean
+        pool:
+          type: boolean
+        pre_foreclosure:
+          type: boolean
+        private_lender:
+          type: boolean
+        quit_claim:
+          type: boolean
+        reo:
+          type: boolean
+        tax_lien:
+          type: boolean
+        vacant:
+          type: boolean
+        
+        # Range parameters
+        beds:
+          $ref: '#/components/schemas/IntRange'
+        baths:
+          $ref: '#/components/schemas/IntRange'
+        building_size:
+          $ref: '#/components/schemas/IntRange'
+        lot_size:
+          $ref: '#/components/schemas/IntRange'
+        value:
+          $ref: '#/components/schemas/IntRange'
+        year_built:
+          $ref: '#/components/schemas/IntRange'
+        years_owned:
+          $ref: '#/components/schemas/IntRange'
+        estimated_equity:
+          $ref: '#/components/schemas/IntRange'
+        last_sale_price:
+          $ref: '#/components/schemas/IntRange'
+        last_sale_date:
+          $ref: '#/components/schemas/DateRange'
+        mls_listing_price:
+          $ref: '#/components/schemas/IntRange'
+        mls_days_on_market:
+          $ref: '#/components/schemas/IntRange'
+
+    PropertyDetailParameters:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Property ID from search results
+        comps:
+          type: boolean
+          description: Include comparable properties
+          default: false
+        exact_match:
+          type: boolean
+          description: Require exact address match
+          default: false
+        address:
+          type: string
+          description: Fully formatted address
+        house:
+          type: string
+          description: House number
+        unit:
+          type: string
+          description: Unit number
+        street:
+          type: string
+          description: Street name
+        city:
+          type: string
+          description: City name
+        state:
+          type: string
+          pattern: "^[A-Z]{2}$"
+          description: Two-letter state code
+        county:
+          type: string
+          description: County name
+        zip:
+          type: string
+          pattern: "^[0-9]{5}$"
+          description: 5-digit ZIP code
+        apn:
+          type: string
+          description: Assessor's Parcel Number
+        fips:
+          type: string
+          pattern: "^[0-9]{5}$"
+          description: FIPS county code
+
+    PropertyBulkParameters:
+      type: object
+      required:
+        - ids
+      properties:
+        ids:
+          type: array
+          maxItems: 1000
+          items:
+            type: string
+          description: List of property IDs (max 1000)
+
+    PropertyParcelParameters:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Property ID
+        address:
+          type: string
+          description: Fully formatted address
+        house:
+          type: string
+          description: House number
+        unit:
+          type: string
+          description: Unit number
+        street:
+          type: string
+          description: Street name
+        city:
+          type: string
+          description: City name
+        state:
+          type: string
+          pattern: "^[A-Z]{2}$"
+        county:
+          type: string
+          description: County name
+        zip:
+          type: string
+          pattern: "^[0-9]{5}$"
+        apn:
+          type: string
+          description: Assessor's Parcel Number
+        fips:
+          type: string
+          description: FIPS county code
+        radius:
+          type: number
+          minimum: 0.1
+          maximum: 10
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+        polygon:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeoCoordinate'
+        resultIndex:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 1
+          maximum: 250
+
+    PropertyCompsParameters:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Property ID
+        address:
+          type: string
+          description: Fully formatted address
+
+    AutoCompleteParameters:
+      type: object
+      required:
+        - search
+      properties:
+        search:
+          type: string
+          minLength: 3
+          description: Search term (minimum 3 characters)
+        search_types:
+          type: array
+          items:
+            type: string
+          description: Filter by search types
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+        precision:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Coordinate precision digits
+
+    AddressVerificationParameters:
+      type: object
+      properties:
+        strict:
+          type: boolean
+          description: Enable strict verification mode
+        addresses:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/AddressToVerify'
+      required: 
+        -  addresses
+
+    AddressToVerify:
+      type: object
+      properties:
+        key:
+          type: string
+          description: User-provided key for matching request to response
+        address:
+          type: string
+          description: Complete formatted address
+        street:
+          type: string
+          description: Street address
+        city:
+          type: string
+          description: City name
+        state:
+          type: string
+          pattern: "^[A-Z]{2}$"
+          description: Two-letter state code
+        zip:
+          type: string
+          pattern: "^[0-9]{5}$"
+          description: 5-digit ZIP code
+        fips:
+          type: string
+          description: FIPS county code
+        apn:
+          type: string
+          description: Assessor's Parcel Number
+
+    # Result Schemas
+    PropertySearchResult:
+      type: object
+      description: "TODO: enhance - Property search result summary"
+      allOf:
+        - $ref: '#/components/schemas/PropertyIdentifiers'
+        - $ref: '#/components/schemas/PropertyAddress'
+        - $ref: '#/components/schemas/PropertyCharacteristics'
+        - $ref: '#/components/schemas/PropertyValuation'
+        - $ref: '#/components/schemas/PropertyStatusFlags'
+        - $ref: '#/components/schemas/LegalFinancialFlags'
+        - $ref: '#/components/schemas/MLSInformation'
+
+    PropertyDetail:
+      type: object
+      description: Complete property details
+      allOf:
+        - $ref: '#/components/schemas/PropertyIdentifiers'
+        - type: object
+          properties:
+            address:
+              $ref: '#/components/schemas/PropertyAddress'
+            propertyInfo:
+              allOf:
+                - $ref: '#/components/schemas/PropertyCharacteristics'
+                - $ref: '#/components/schemas/PropertyFeatures'
+                - $ref: '#/components/schemas/PropertyLocation'
+            ownerInfo:
+              $ref: '#/components/schemas/OwnerInformation'
+            propertyValuation:
+              $ref: '#/components/schemas/PropertyValuation'
+            currentMortgages:
+              type: array
+              items:
+                $ref: '#/components/schemas/MortgageInformation'
+            mortgageHistory:
+              type: array
+              items:
+                $ref: '#/components/schemas/MortgageInformation'
+            saleHistory:
+              type: array
+              items:
+                $ref: '#/components/schemas/SalesHistoryRecord'
+            taxInfo:
+              $ref: '#/components/schemas/TaxInformation'
+            demographics:
+              $ref: '#/components/schemas/Demographics'
+            mlsInfo:
+              $ref: '#/components/schemas/MLSInformation'
+            floodInfo:
+              $ref: '#/components/schemas/FloodZoneInformation'
+            propertyFlags:
+              allOf:
+                - $ref: '#/components/schemas/PropertyStatusFlags'
+                - $ref: '#/components/schemas/LegalFinancialFlags'
+            neighborhood:
+              $ref: '#/components/schemas/Neighborhood'
+            comps:
+              type: array
+              description: Comparable properties (when requested)
+              items:
+                type: object
+                description: "TODO: enhance - Comparable property structure"
+            reapiAvm:
+              type: integer
+              description: RealEstateAPI's Automated Valuation Model
+
+
+  # Request Body Schemas
+  requestBodies:
+    PropertySearchRequest:
+      description: Property search request parameters
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PropertySearchParameters'
+    
+    PropertyDetailRequest:
+      description: Property detail request parameters
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PropertyDetailParameters'
+    
+    PropertyBulkRequest:
+      description: Bulk property detail request
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PropertyBulkParameters'
+    
+    PropertyParcelRequest:
+      description: Property parcel boundary request
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PropertyParcelParameters'
+    
+    PropertyCompsRequest:
+      description: Property comparables request
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PropertyCompsParameters'
+    
+    AutoCompleteRequest:
+      description: Address autocomplete request
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AutoCompleteParameters'
+    
+    AddressVerificationRequest:
+      description: Address verification request
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddressVerificationParameters'
+
+  # Response Schemas
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    
+    Unauthorized:
+      description: Unauthorized - Invalid API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    
+    RateLimitExceeded:
+      description: Rate Limit Exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    
+    PropertySearchResponse:
+      description: Property search results
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ApiResponse'
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PropertySearchResult'
+                  resultCount:
+                    type: integer
+                    description: Total number of results matching the search
+                  resultIndex:
+                    type: integer
+                    description: Starting index of returned results
+                  recordCount:
+                    type: integer
+                    description: Number of records returned in this response
+    
+    PropertyDetailResponse:
+      description: Detailed property information
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ApiResponse'
+              - type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PropertyDetail'
+
+    # TODO: improvements needed
+    # Additional schemas to be defined:
+    # - ForeclosureInformation
+    # - LienInformation  
+    # - PropertyComparables
+    # - PropertyBoundary (GeoJSON)
+    # - PropertyPortfolio
+    # - MarketAnalytics
+    # - PropertyReports

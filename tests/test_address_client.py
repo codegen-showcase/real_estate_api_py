@@ -1,5 +1,6 @@
 import pydantic
 import pytest
+import os
 
 from real_estate_api_py import AsyncClient, Client
 from real_estate_api_py.environment import Environment
@@ -25,7 +26,9 @@ def test_auto_complete_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling sync method with example data
-    client = Client(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = Client(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = client.address.auto_complete(search="string")
     try:
         pydantic.TypeAdapter(models.AddressAutoCompleteResponse).validate_python(
@@ -57,7 +60,9 @@ async def test_await_auto_complete_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling async method with example data
-    client = AsyncClient(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = AsyncClient(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = await client.address.auto_complete(search="string")
     try:
         pydantic.TypeAdapter(models.AddressAutoCompleteResponse).validate_python(
@@ -88,8 +93,10 @@ def test_verify_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling sync method with example data
-    client = Client(api_key="API_KEY", environment=Environment.MOCK_SERVER)
-    response = client.address.verify()
+    client = Client(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
+    response = client.address.verify(addresses=[{}])
     try:
         pydantic.TypeAdapter(models.AddressVerifyResponse).validate_python(response)
         is_json = True
@@ -118,8 +125,10 @@ async def test_await_verify_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling async method with example data
-    client = AsyncClient(api_key="API_KEY", environment=Environment.MOCK_SERVER)
-    response = await client.address.verify()
+    client = AsyncClient(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
+    response = await client.address.verify(addresses=[{}])
     try:
         pydantic.TypeAdapter(models.AddressVerifyResponse).validate_python(response)
         is_json = True

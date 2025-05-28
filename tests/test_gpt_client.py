@@ -1,5 +1,6 @@
 import pydantic
 import pytest
+import os
 
 from real_estate_api_py import AsyncClient, Client
 from real_estate_api_py.environment import Environment
@@ -25,7 +26,9 @@ def test_chat_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling sync method with example data
-    client = Client(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = Client(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = client.gpt.chat(
         query="Find all properties listed for sale in Herndon Virginia between 600K and 700K",
         x_api_key="string",
@@ -59,7 +62,9 @@ async def test_await_chat_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling async method with example data
-    client = AsyncClient(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = AsyncClient(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = await client.gpt.chat(
         query="Find all properties listed for sale in Herndon Virginia between 600K and 700K",
         x_api_key="string",

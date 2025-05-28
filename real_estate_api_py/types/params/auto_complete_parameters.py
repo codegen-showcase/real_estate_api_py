@@ -22,9 +22,7 @@ class AutoCompleteParameters(typing_extensions.TypedDict):
     Search term (minimum 3 characters)
     """
 
-    search_types: typing_extensions.NotRequired[
-        typing.List[typing_extensions.Literal["A", "C", "G", "N", "P", "T", "Z"]]
-    ]
+    search_types: typing_extensions.NotRequired[typing.List[str]]
     """
     Filter by search types
     """
@@ -46,6 +44,6 @@ class _SerializerAutoCompleteParameters(pydantic.BaseModel):
     search: str = pydantic.Field(
         alias="search",
     )
-    search_types: typing.Optional[
-        typing.List[typing_extensions.Literal["A", "C", "G", "N", "P", "T", "Z"]]
-    ] = pydantic.Field(alias="search_types", default=None)
+    search_types: typing.Optional[typing.List[str]] = pydantic.Field(
+        alias="search_types", default=None
+    )

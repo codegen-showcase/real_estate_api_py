@@ -10,7 +10,7 @@ class AddressVerificationParameters(typing_extensions.TypedDict):
     AddressVerificationParameters
     """
 
-    addresses: typing_extensions.NotRequired[typing.List[AddressToVerify]]
+    addresses: typing_extensions.Required[typing.List[AddressToVerify]]
 
     strict: typing_extensions.NotRequired[bool]
     """
@@ -28,7 +28,7 @@ class _SerializerAddressVerificationParameters(pydantic.BaseModel):
         populate_by_name=True,
     )
 
-    addresses: typing.Optional[typing.List[_SerializerAddressToVerify]] = (
-        pydantic.Field(alias="addresses", default=None)
+    addresses: typing.List[_SerializerAddressToVerify] = pydantic.Field(
+        alias="addresses",
     )
     strict: typing.Optional[bool] = pydantic.Field(alias="strict", default=None)

@@ -1,5 +1,6 @@
 import pydantic
 import pytest
+import os
 
 from real_estate_api_py import AsyncClient, Client
 from real_estate_api_py.environment import Environment
@@ -25,7 +26,9 @@ def test_comparables_advanced_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling sync method with example data
-    client = Client(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = Client(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = client.property.comparables_advanced(
         address="123 Main St, Arlington, VA 22205",
         max_days_back=180,
@@ -62,7 +65,9 @@ async def test_await_comparables_advanced_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling async method with example data
-    client = AsyncClient(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = AsyncClient(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = await client.property.comparables_advanced(
         address="123 Main St, Arlington, VA 22205",
         max_days_back=180,
@@ -98,7 +103,9 @@ def test_search_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling sync method with example data
-    client = Client(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = Client(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = client.property.search()
     try:
         pydantic.TypeAdapter(models.PropertySearchResponse).validate_python(response)
@@ -128,7 +135,9 @@ async def test_await_search_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling async method with example data
-    client = AsyncClient(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = AsyncClient(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = await client.property.search()
     try:
         pydantic.TypeAdapter(models.PropertySearchResponse).validate_python(response)
@@ -157,7 +166,9 @@ def test_pins_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling sync method with example data
-    client = Client(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = Client(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = client.property.pins()
     try:
         pydantic.TypeAdapter(models.PropertyPinsResponse).validate_python(response)
@@ -187,7 +198,9 @@ async def test_await_pins_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling async method with example data
-    client = AsyncClient(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = AsyncClient(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = await client.property.pins()
     try:
         pydantic.TypeAdapter(models.PropertyPinsResponse).validate_python(response)
@@ -216,7 +229,9 @@ def test_bulk_details_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling sync method with example data
-    client = Client(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = Client(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = client.property.bulk_details(ids=["string"])
     try:
         pydantic.TypeAdapter(models.PropertyBulkDetailsResponse).validate_python(
@@ -248,7 +263,9 @@ async def test_await_bulk_details_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling async method with example data
-    client = AsyncClient(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = AsyncClient(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = await client.property.bulk_details(ids=["string"])
     try:
         pydantic.TypeAdapter(models.PropertyBulkDetailsResponse).validate_python(
@@ -279,7 +296,9 @@ def test_details_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling sync method with example data
-    client = Client(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = Client(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = client.property.details()
     try:
         pydantic.TypeAdapter(models.PropertyDetailsResponse).validate_python(response)
@@ -309,7 +328,9 @@ async def test_await_details_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling async method with example data
-    client = AsyncClient(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = AsyncClient(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = await client.property.details()
     try:
         pydantic.TypeAdapter(models.PropertyDetailsResponse).validate_python(response)
@@ -338,7 +359,9 @@ def test_comparables_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling sync method with example data
-    client = Client(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = Client(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = client.property.comparables()
     try:
         pydantic.TypeAdapter(models.PropertyComparablesResponse).validate_python(
@@ -370,7 +393,9 @@ async def test_await_comparables_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling async method with example data
-    client = AsyncClient(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = AsyncClient(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = await client.property.comparables()
     try:
         pydantic.TypeAdapter(models.PropertyComparablesResponse).validate_python(
@@ -401,7 +426,9 @@ def test_parcel_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling sync method with example data
-    client = Client(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = Client(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = client.property.parcel()
     try:
         pydantic.TypeAdapter(models.PropertyParcelResponse).validate_python(response)
@@ -431,7 +458,9 @@ async def test_await_parcel_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling async method with example data
-    client = AsyncClient(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = AsyncClient(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = await client.property.parcel()
     try:
         pydantic.TypeAdapter(models.PropertyParcelResponse).validate_python(response)

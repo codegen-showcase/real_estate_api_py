@@ -13,7 +13,7 @@ from os import getenv
 from real_estate_api_py import Client
 
 client = Client(api_key=getenv("API_KEY"))
-res = client.address.verify()
+res = client.address.verify(addresses=[{}])
 ```
 
 #### Asynchronous Client
@@ -23,7 +23,7 @@ from os import getenv
 from real_estate_api_py import AsyncClient
 
 client = AsyncClient(api_key=getenv("API_KEY"))
-res = await client.address.verify()
+res = await client.address.verify(addresses=[{}])
 ```
 
 ### AutoComplete API <a name="auto_complete"></a>

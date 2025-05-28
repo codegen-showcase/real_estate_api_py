@@ -1,6 +1,5 @@
 import pydantic
 import typing
-import typing_extensions
 
 from .neighborhood import Neighborhood
 from .property_address import PropertyAddress
@@ -44,9 +43,7 @@ class AddressAutoCompleteResponseDataItem(pydantic.BaseModel):
     """
     Property ID if this is a specific property
     """
-    search_type: typing.Optional[
-        typing_extensions.Literal["A", "C", "G", "N", "P", "T", "Z"]
-    ] = pydantic.Field(alias="searchType", default=None)
+    search_type: typing.Optional[str] = pydantic.Field(alias="searchType", default=None)
     """
     Type of search result
     """

@@ -1,5 +1,6 @@
 import pydantic
 import pytest
+import os
 
 from real_estate_api_py import AsyncClient, Client
 from real_estate_api_py.environment import Environment
@@ -25,7 +26,9 @@ def test_lien_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling sync method with example data
-    client = Client(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = Client(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = client.reporting.lien(address="123 Main St, Arlington, VA 22205")
     try:
         pydantic.TypeAdapter(models.ReportingLienResponse).validate_python(response)
@@ -55,7 +58,9 @@ async def test_await_lien_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling async method with example data
-    client = AsyncClient(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = AsyncClient(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = await client.reporting.lien(address="123 Main St, Arlington, VA 22205")
     try:
         pydantic.TypeAdapter(models.ReportingLienResponse).validate_python(response)
@@ -84,7 +89,9 @@ def test_generate_csv_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling sync method with example data
-    client = Client(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = Client(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = client.reporting.generate_csv(
         file_name="property_export_2024",
         map=["id", "address", "estimatedValue", "bedrooms", "bathrooms"],
@@ -119,7 +126,9 @@ async def test_await_generate_csv_200_success_default():
     This test uses example data to verify the endpoint behavior.
     """
     # tests calling async method with example data
-    client = AsyncClient(api_key="API_KEY", environment=Environment.MOCK_SERVER)
+    client = AsyncClient(
+        api_key=os.getenv("REAL_ESTATE_API_KEY"), environment=Environment.PRODUCTION
+    )
     response = await client.reporting.generate_csv(
         file_name="property_export_2024",
         map=["id", "address", "estimatedValue", "bedrooms", "bathrooms"],

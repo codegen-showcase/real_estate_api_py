@@ -1,5 +1,4 @@
 import typing
-import typing_extensions
 
 from real_estate_api_py.core import (
     AsyncBaseClient,
@@ -19,9 +18,7 @@ class AddressClient:
     def verify(
         self,
         *,
-        addresses: typing.Union[
-            typing.Optional[typing.List[params.AddressToVerify]], type_utils.NotGiven
-        ] = type_utils.NOT_GIVEN,
+        addresses: typing.List[params.AddressToVerify],
         strict: typing.Union[
             typing.Optional[bool], type_utils.NotGiven
         ] = type_utils.NOT_GIVEN,
@@ -36,8 +33,8 @@ class AddressClient:
         POST /v2/AddressVerification
 
         Args:
-            addresses: typing.List[AddressToVerify]
             strict: Enable strict verification mode
+            addresses: typing.List[AddressToVerify]
             request_options: Additional options to customize the HTTP request
 
         Returns:
@@ -49,11 +46,11 @@ class AddressClient:
 
         Examples:
         ```py
-        client.address.verify()
+        client.address.verify(addresses=[{}])
         ```
         """
         _json = to_encodable(
-            item={"addresses": addresses, "strict": strict},
+            item={"strict": strict, "addresses": addresses},
             dump_with=params._SerializerAddressVerificationParameters,
         )
         return self._base_client.request(
@@ -79,12 +76,7 @@ class AddressClient:
             typing.Optional[int], type_utils.NotGiven
         ] = type_utils.NOT_GIVEN,
         search_types: typing.Union[
-            typing.Optional[
-                typing.List[
-                    typing_extensions.Literal["A", "C", "G", "N", "P", "T", "Z"]
-                ]
-            ],
-            type_utils.NotGiven,
+            typing.Optional[typing.List[str]], type_utils.NotGiven
         ] = type_utils.NOT_GIVEN,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> models.AddressAutoCompleteResponse:
@@ -145,9 +137,7 @@ class AsyncAddressClient:
     async def verify(
         self,
         *,
-        addresses: typing.Union[
-            typing.Optional[typing.List[params.AddressToVerify]], type_utils.NotGiven
-        ] = type_utils.NOT_GIVEN,
+        addresses: typing.List[params.AddressToVerify],
         strict: typing.Union[
             typing.Optional[bool], type_utils.NotGiven
         ] = type_utils.NOT_GIVEN,
@@ -162,8 +152,8 @@ class AsyncAddressClient:
         POST /v2/AddressVerification
 
         Args:
-            addresses: typing.List[AddressToVerify]
             strict: Enable strict verification mode
+            addresses: typing.List[AddressToVerify]
             request_options: Additional options to customize the HTTP request
 
         Returns:
@@ -175,11 +165,11 @@ class AsyncAddressClient:
 
         Examples:
         ```py
-        await client.address.verify()
+        await client.address.verify(addresses=[{}])
         ```
         """
         _json = to_encodable(
-            item={"addresses": addresses, "strict": strict},
+            item={"strict": strict, "addresses": addresses},
             dump_with=params._SerializerAddressVerificationParameters,
         )
         return await self._base_client.request(
@@ -205,12 +195,7 @@ class AsyncAddressClient:
             typing.Optional[int], type_utils.NotGiven
         ] = type_utils.NOT_GIVEN,
         search_types: typing.Union[
-            typing.Optional[
-                typing.List[
-                    typing_extensions.Literal["A", "C", "G", "N", "P", "T", "Z"]
-                ]
-            ],
-            type_utils.NotGiven,
+            typing.Optional[typing.List[str]], type_utils.NotGiven
         ] = type_utils.NOT_GIVEN,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> models.AddressAutoCompleteResponse:

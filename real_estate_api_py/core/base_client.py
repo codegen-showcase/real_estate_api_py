@@ -411,6 +411,7 @@ class SyncBaseClient(BaseClient):
         response = self.httpx_client.request(**req_cfg)
 
         if not response.is_success:
+            print(response.json())
             raise ApiError(response=response)
 
         if self._cast_to_raw_response(res=response, cast_to=cast_to):
