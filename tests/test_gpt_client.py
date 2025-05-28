@@ -3,17 +3,18 @@ import pytest
 
 from real_estate_api_py import AsyncClient, Client
 from real_estate_api_py.environment import Environment
+from real_estate_api_py.types import models
 
 
-def test_chat_200_generated_success():
+def test_chat_200_success_default():
     """Tests a POST request to the /v2/PropGPT endpoint.
 
     Operation: chat
-    Test Case ID: generated_success
+    Test Case ID: success_default
     Expected Status: 200
     Mode: Synchronous execution
 
-    Response : str
+    Response : models.GptChatResponse
 
     Validates:
     - Authentication requirements are satisfied
@@ -25,25 +26,29 @@ def test_chat_200_generated_success():
     """
     # tests calling sync method with example data
     client = Client(api_key="API_KEY", environment=Environment.MOCK_SERVER)
-    response = client.gpt.chat(x_api_key="string", x_openai_key="string")
+    response = client.gpt.chat(
+        query="Find all properties listed for sale in Herndon Virginia between 600K and 700K",
+        x_api_key="string",
+        x_openai_key="string",
+    )
     try:
-        pydantic.TypeAdapter(str).validate_python(response)
-        is_text = True
+        pydantic.TypeAdapter(models.GptChatResponse).validate_python(response)
+        is_json = True
     except pydantic.ValidationError:
-        is_text = False
-    assert is_text, "failed response type check"
+        is_json = False
+    assert is_json, "failed response type check"
 
 
 @pytest.mark.asyncio
-async def test_await_chat_200_generated_success():
+async def test_await_chat_200_success_default():
     """Tests a POST request to the /v2/PropGPT endpoint.
 
     Operation: chat
-    Test Case ID: generated_success
+    Test Case ID: success_default
     Expected Status: 200
     Mode: Asynchronous execution
 
-    Response : str
+    Response : models.GptChatResponse
 
     Validates:
     - Authentication requirements are satisfied
@@ -55,10 +60,14 @@ async def test_await_chat_200_generated_success():
     """
     # tests calling async method with example data
     client = AsyncClient(api_key="API_KEY", environment=Environment.MOCK_SERVER)
-    response = await client.gpt.chat(x_api_key="string", x_openai_key="string")
+    response = await client.gpt.chat(
+        query="Find all properties listed for sale in Herndon Virginia between 600K and 700K",
+        x_api_key="string",
+        x_openai_key="string",
+    )
     try:
-        pydantic.TypeAdapter(str).validate_python(response)
-        is_text = True
+        pydantic.TypeAdapter(models.GptChatResponse).validate_python(response)
+        is_json = True
     except pydantic.ValidationError:
-        is_text = False
-    assert is_text, "failed response type check"
+        is_json = False
+    assert is_json, "failed response type check"

@@ -6,7 +6,7 @@ class Environment(enum.Enum):
     """Pre-defined base URLs for the API"""
 
     PRODUCTION = "https://api.realestateapi.com"
-    MOCK_SERVER = "https://api.sideko.dev/v1/mock/public/real-estate-api/0.1.0"
+    MOCK_SERVER = "https://api.sideko.dev/v1/mock/public/real-estate-api/0.2.0"
 
 
 def _get_base_url(

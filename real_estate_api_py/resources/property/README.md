@@ -1,9 +1,11 @@
 
-### CSV Generator API <a name="generate_csv"></a>
+### Property Boundary API <a name="parcel"></a>
+
+Shape files API and property search API. All requests return the parcel boundaries 
+in GEOJSON format. Quickly implement this API into your mapping applications.
 
 
-
-**API Endpoint**: `POST /v2/CSVBuilder`
+**API Endpoint**: `POST /v1/PropertyParcel`
 
 #### Synchronous Client
 
@@ -12,7 +14,7 @@ from os import getenv
 from real_estate_api_py import Client
 
 client = Client(api_key=getenv("API_KEY"))
-res = client.property.generate_csv()
+res = client.property.parcel()
 ```
 
 #### Asynchronous Client
@@ -22,11 +24,12 @@ from os import getenv
 from real_estate_api_py import AsyncClient
 
 client = AsyncClient(api_key=getenv("API_KEY"))
-res = await client.property.generate_csv()
+res = await client.property.parcel()
 ```
 
-### v2/PropertyComps API <a name="comps_standard"></a>
+### Property Comparables API v2 <a name="comparables"></a>
 
+Generate property comparables (comps) for valuation analysis using our standard algorithm.
 
 
 **API Endpoint**: `POST /v2/PropertyComps`
@@ -38,7 +41,7 @@ from os import getenv
 from real_estate_api_py import Client
 
 client = Client(api_key=getenv("API_KEY"))
-res = client.property.comps_standard()
+res = client.property.comparables()
 ```
 
 #### Asynchronous Client
@@ -48,12 +51,14 @@ from os import getenv
 from real_estate_api_py import AsyncClient
 
 client = AsyncClient(api_key=getenv("API_KEY"))
-res = await client.property.comps_standard()
+res = await client.property.comparables()
 ```
 
 ### Property Detail API <a name="details"></a>
 
-Comps, Mortgages, Mailing Addresses, Property Sales History & More!
+Comprehensive property information including comps, mortgages, mailing addresses, 
+property sales history & more!
+
 
 **API Endpoint**: `POST /v2/PropertyDetail`
 
@@ -77,9 +82,12 @@ client = AsyncClient(api_key=getenv("API_KEY"))
 res = await client.property.details()
 ```
 
-### Property Detail Bulk API <a name="details_bulk"></a>
+### Property Detail Bulk API <a name="bulk_details"></a>
 
-For retrieving of up to 1000 properties at once.  Can be used standalone, but it's designed to work together with the Property Search API.  Use this API for quickly exporting lists, or bulk search requests for analytics.  Pass in addresses, or a list of ID's returned from the Property Search API.
+For retrieving up to 1000 properties at once. Can be used standalone, but it's designed 
+to work together with the Property Search API. Use this API for quickly exporting lists, 
+or bulk search requests for analytics.
+
 
 **API Endpoint**: `POST /v2/PropertyDetailBulk`
 
@@ -90,7 +98,7 @@ from os import getenv
 from real_estate_api_py import Client
 
 client = Client(api_key=getenv("API_KEY"))
-res = client.property.details_bulk()
+res = client.property.bulk_details(ids=["string"])
 ```
 
 #### Asynchronous Client
@@ -100,12 +108,15 @@ from os import getenv
 from real_estate_api_py import AsyncClient
 
 client = AsyncClient(api_key=getenv("API_KEY"))
-res = await client.property.details_bulk()
+res = await client.property.bulk_details(ids=["string"])
 ```
 
-### [BETA] Mapping ("Pins") API <a name="pins"></a>
+### Mapping (Pins) API [BETA] <a name="pins"></a>
 
-Have your PropTech Maps Come to Life with Unlimited "Pins" on a Map API. Only available on Growth+ Plans
+Create unlimited map pins for PropTech mapping applications. 
+Returns property data optimized for map display with coordinates and summary information.
+Only available on Growth+ Plans.
+
 
 **API Endpoint**: `POST /v2/PropertyMapping`
 
@@ -131,7 +142,12 @@ res = await client.property.pins()
 
 ### Property Search API <a name="search"></a>
 
-Searchable API for list building, search counts, and advanced filtering on properties.  You can also use this API to implement your own comparables API, or property analytics API.  Questions?  Contact our team to ask us for best practices with using this API.This API implements easy paging so your apps can easily manage filtered results in a results pane with paging.  When your user clicks on a result, just use the id from this API to get the full property results using the Property Detail API.  Questions on best practices for implementing paged property results in your app?  Just contact our team.
+Searchable API for list building, search counts, and advanced filtering on properties. 
+You can also use this API to implement your own comparables API, or property analytics API.
+
+This API implements easy paging so your apps can easily manage filtered results in a results pane with paging. 
+When your user clicks on a result, just use the id from this API to get the full property results using the Property Detail API.
+
 
 **API Endpoint**: `POST /v2/PropertySearch`
 
@@ -142,7 +158,7 @@ from os import getenv
 from real_estate_api_py import Client
 
 client = Client(api_key=getenv("API_KEY"))
-res = client.property.search(x_api_key="string")
+res = client.property.search()
 ```
 
 #### Asynchronous Client
@@ -152,12 +168,14 @@ from os import getenv
 from real_estate_api_py import AsyncClient
 
 client = AsyncClient(api_key=getenv("API_KEY"))
-res = await client.property.search(x_api_key="string")
+res = await client.property.search()
 ```
 
-### /v3/PropertyComps API <a name="comps_custom"></a>
+### Property Comparables API v3 <a name="comparables_advanced"></a>
 
-Customize your comps model
+Advanced property comparables API with customizable comp model parameters 
+for more precise valuation analysis.
+
 
 **API Endpoint**: `POST /v3/PropertyComps`
 
@@ -168,7 +186,12 @@ from os import getenv
 from real_estate_api_py import Client
 
 client = Client(api_key=getenv("API_KEY"))
-res = client.property.comps_custom()
+res = client.property.comparables_advanced(
+    address="123 Main St, Arlington, VA 22205",
+    max_days_back=180,
+    max_radius_miles=1.0,
+    max_results=10,
+)
 ```
 
 #### Asynchronous Client
@@ -178,5 +201,10 @@ from os import getenv
 from real_estate_api_py import AsyncClient
 
 client = AsyncClient(api_key=getenv("API_KEY"))
-res = await client.property.comps_custom()
+res = await client.property.comparables_advanced(
+    address="123 Main St, Arlington, VA 22205",
+    max_days_back=180,
+    max_radius_miles=1.0,
+    max_results=10,
+)
 ```

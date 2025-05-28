@@ -8,19 +8,23 @@ class GptChatBody(typing_extensions.TypedDict):
     GptChatBody
     """
 
-    model: typing_extensions.NotRequired[str]
+    model: typing_extensions.NotRequired[
+        typing_extensions.Literal[
+            "gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o", "gpt-4o-mini"
+        ]
+    ]
     """
-    Options: gpt-4, gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo
+    OpenAI model to use for query processing
     """
 
     query: typing_extensions.Required[str]
     """
-    A natural language string that references data points in the Property Search API in order to retrieve a list of properties.
+    Natural language string that references data points for property search
     """
 
     size: typing_extensions.NotRequired[int]
     """
-    Maximum of 250
+    Maximum number of results to return
     """
 
 
@@ -34,7 +38,11 @@ class _SerializerGptChatBody(pydantic.BaseModel):
         populate_by_name=True,
     )
 
-    model: typing.Optional[str] = pydantic.Field(alias="model", default=None)
+    model: typing.Optional[
+        typing_extensions.Literal[
+            "gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o", "gpt-4o-mini"
+        ]
+    ] = pydantic.Field(alias="model", default=None)
     query: str = pydantic.Field(
         alias="query",
     )

@@ -26,7 +26,12 @@ client = AsyncClient(api_key=getenv("API_KEY"))
 
 ### [address](real_estate_api_py/resources/address/README.md)
 
+* [auto_complete](real_estate_api_py/resources/address/README.md#auto_complete) - AutoComplete API
 * [verify](real_estate_api_py/resources/address/README.md#verify) - Address Verification API
+
+### [avm](real_estate_api_py/resources/avm/README.md)
+
+* [get_valuation](real_estate_api_py/resources/avm/README.md#get_valuation) - Lender Grade AVM API
 
 ### [gpt](real_estate_api_py/resources/gpt/README.md)
 
@@ -34,20 +39,17 @@ client = AsyncClient(api_key=getenv("API_KEY"))
 
 ### [property](real_estate_api_py/resources/property/README.md)
 
-* [comps_custom](real_estate_api_py/resources/property/README.md#comps_custom) - /v3/PropertyComps API
-* [comps_standard](real_estate_api_py/resources/property/README.md#comps_standard) - v2/PropertyComps API
+* [bulk_details](real_estate_api_py/resources/property/README.md#bulk_details) - Property Detail Bulk API
+* [comparables](real_estate_api_py/resources/property/README.md#comparables) - Property Comparables API v2
+* [comparables_advanced](real_estate_api_py/resources/property/README.md#comparables_advanced) - Property Comparables API v3
 * [details](real_estate_api_py/resources/property/README.md#details) - Property Detail API
-* [details_bulk](real_estate_api_py/resources/property/README.md#details_bulk) - Property Detail Bulk API
-* [generate_csv](real_estate_api_py/resources/property/README.md#generate_csv) - CSV Generator API
-* [pins](real_estate_api_py/resources/property/README.md#pins) - [BETA] Mapping ("Pins") API
+* [parcel](real_estate_api_py/resources/property/README.md#parcel) - Property Boundary API
+* [pins](real_estate_api_py/resources/property/README.md#pins) - Mapping (Pins) API [BETA]
 * [search](real_estate_api_py/resources/property/README.md#search) - Property Search API
 
-### [reports](real_estate_api_py/resources/reports/README.md)
+### [reporting](real_estate_api_py/resources/reporting/README.md)
 
-* [property_liens](real_estate_api_py/resources/reports/README.md#property_liens) - Involuntary Liens API
-
-### [valuation](real_estate_api_py/resources/valuation/README.md)
-
-* [avm](real_estate_api_py/resources/valuation/README.md#avm) - Lender Grade AVM API
+* [generate_csv](real_estate_api_py/resources/reporting/README.md#generate_csv) - CSV Generator API
+* [lien](real_estate_api_py/resources/reporting/README.md#lien) - Involuntary Liens API
 
 <!-- MODULE DOCS END -->

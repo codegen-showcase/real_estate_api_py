@@ -1,4 +1,5 @@
 import typing
+import typing_extensions
 
 from real_estate_api_py.core import (
     AsyncBaseClient,
@@ -8,7 +9,7 @@ from real_estate_api_py.core import (
     to_encodable,
     type_utils,
 )
-from real_estate_api_py.types import params
+from real_estate_api_py.types import models, params
 
 
 class GptClient:
@@ -18,28 +19,41 @@ class GptClient:
     def chat(
         self,
         *,
+        query: str,
         x_api_key: str,
         x_openai_key: str,
-        data: typing.Union[
-            typing.Optional[params.GptChatBody], type_utils.NotGiven
+        model: typing.Union[
+            typing.Optional[
+                typing_extensions.Literal[
+                    "gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o", "gpt-4o-mini"
+                ]
+            ],
+            type_utils.NotGiven,
+        ] = type_utils.NOT_GIVEN,
+        size: typing.Union[
+            typing.Optional[int], type_utils.NotGiven
         ] = type_utils.NOT_GIVEN,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> str:
+    ) -> models.GptChatResponse:
         """
         PropGPT API
 
-        Check out the functionality of this endpoint at https://www.propgpt.com
+        Natural language property search using AI. Convert natural language queries
+        into structured property searches. Check out the functionality at https://www.propgpt.com
+
 
         POST /v2/PropGPT
 
         Args:
-            data: GptChatBody
-            x-api-key: str
-            x-openai-key: Sign up with OpenAI (at https://openai.com/blog/openai-api) and get your free API Key to attach to all your requests to this endpoint for token spend tracking.
+            model: OpenAI model to use for query processing
+            size: Maximum number of results to return
+            query: Natural language string that references data points for property search
+            x-api-key: Your Real Estate API key
+            x-openai-key: Your OpenAI API key for token spend tracking
             request_options: Additional options to customize the HTTP request
 
         Returns:
-            200
+            AI-powered property search results
 
         Raises:
             ApiError: A custom exception class that provides additional context
@@ -47,24 +61,27 @@ class GptClient:
 
         Examples:
         ```py
-        client.gpt.chat(x_api_key="string", x_openai_key="string")
+        client.gpt.chat(
+            query="Find all properties listed for sale in Herndon Virginia between 600K and 700K",
+            x_api_key="string",
+            x_openai_key="string",
+        )
         ```
         """
         _header: typing.Dict[str, str] = {}
         _header["x-api-key"] = str(x_api_key)
         _header["x-openai-key"] = str(x_openai_key)
-        _json = (
-            to_encodable(item=data, dump_with=params._SerializerGptChatBody)
-            if data
-            else None
+        _json = to_encodable(
+            item={"model": model, "size": size, "query": query},
+            dump_with=params._SerializerGptChatBody,
         )
         return self._base_client.request(
             method="POST",
             path="/v2/PropGPT",
-            auth_names=["sec0"],
+            auth_names=["ApiKeyAuth"],
             headers=_header,
             json=_json,
-            cast_to=str,
+            cast_to=models.GptChatResponse,
             request_options=request_options or default_request_options(),
         )
 
@@ -76,28 +93,41 @@ class AsyncGptClient:
     async def chat(
         self,
         *,
+        query: str,
         x_api_key: str,
         x_openai_key: str,
-        data: typing.Union[
-            typing.Optional[params.GptChatBody], type_utils.NotGiven
+        model: typing.Union[
+            typing.Optional[
+                typing_extensions.Literal[
+                    "gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o", "gpt-4o-mini"
+                ]
+            ],
+            type_utils.NotGiven,
+        ] = type_utils.NOT_GIVEN,
+        size: typing.Union[
+            typing.Optional[int], type_utils.NotGiven
         ] = type_utils.NOT_GIVEN,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> str:
+    ) -> models.GptChatResponse:
         """
         PropGPT API
 
-        Check out the functionality of this endpoint at https://www.propgpt.com
+        Natural language property search using AI. Convert natural language queries
+        into structured property searches. Check out the functionality at https://www.propgpt.com
+
 
         POST /v2/PropGPT
 
         Args:
-            data: GptChatBody
-            x-api-key: str
-            x-openai-key: Sign up with OpenAI (at https://openai.com/blog/openai-api) and get your free API Key to attach to all your requests to this endpoint for token spend tracking.
+            model: OpenAI model to use for query processing
+            size: Maximum number of results to return
+            query: Natural language string that references data points for property search
+            x-api-key: Your Real Estate API key
+            x-openai-key: Your OpenAI API key for token spend tracking
             request_options: Additional options to customize the HTTP request
 
         Returns:
-            200
+            AI-powered property search results
 
         Raises:
             ApiError: A custom exception class that provides additional context
@@ -105,23 +135,26 @@ class AsyncGptClient:
 
         Examples:
         ```py
-        await client.gpt.chat(x_api_key="string", x_openai_key="string")
+        await client.gpt.chat(
+            query="Find all properties listed for sale in Herndon Virginia between 600K and 700K",
+            x_api_key="string",
+            x_openai_key="string",
+        )
         ```
         """
         _header: typing.Dict[str, str] = {}
         _header["x-api-key"] = str(x_api_key)
         _header["x-openai-key"] = str(x_openai_key)
-        _json = (
-            to_encodable(item=data, dump_with=params._SerializerGptChatBody)
-            if data
-            else None
+        _json = to_encodable(
+            item={"model": model, "size": size, "query": query},
+            dump_with=params._SerializerGptChatBody,
         )
         return await self._base_client.request(
             method="POST",
             path="/v2/PropGPT",
-            auth_names=["sec0"],
+            auth_names=["ApiKeyAuth"],
             headers=_header,
             json=_json,
-            cast_to=str,
+            cast_to=models.GptChatResponse,
             request_options=request_options or default_request_options(),
         )
